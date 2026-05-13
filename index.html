@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MECM Training — Intermediate Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c0f;
+  --surface: #111318;
+  --surface2: #181c22;
+  --border: #1e2330;
+  --border2: #2a3040;
+  --text: #e8eaf0;
+  --text2: #8a92a8;
+  --text3: #4a5268;
+  --accent: #4a9eff;
+  --accent2: #1a3a5c;
+  --green: #2ecc71;
+  --green-bg: #0d2b1a;
+  --amber: #f5a623;
+  --amber-bg: #2b1f0a;
+  --red: #e74c3c;
+  --red-bg: #2b0f0a;
+  --purple: #9b59b6;
+  --purple-bg: #1f0f2b;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; min-height: 100vh; }
+
+/* LAYOUT */
+.shell { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 1.5rem 0; display: flex; flex-direction: column; }
+.main { flex: 1; padding: 2.5rem 3rem; max-width: 860px; }
+
+/* SIDEBAR */
+.logo { padding: 0 1.25rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.logo-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: .25rem; }
+.logo-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.nav-section { padding: 0 .75rem; margin-bottom: .25rem; }
+.nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); padding: .5rem .5rem .25rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: .5rem .6rem; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all .15s; border: 1px solid transparent; text-decoration: none; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent2); color: var(--accent); border-color: rgba(74,158,255,.2); }
+.nav-num { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 18px; }
+.nav-item.active .nav-num { color: var(--accent); }
+.diff-pip { display: inline-flex; gap: 2px; margin-left: auto; }
+.dp { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); }
+.dp.on { background: var(--accent); }
+
+/* MODULE */
+.module { display: none; animation: fadein .2s ease; }
+.module.active { display: block; }
+@keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.mod-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.mod-meta { display: flex; align-items: center; gap: 12px; margin-bottom: .75rem; flex-wrap: wrap; }
+.mod-num { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 20px; }
+.b-pre { background: var(--purple-bg); color: var(--purple); }
+.b-stage { background: var(--accent2); color: var(--accent); }
+.b-deploy { background: var(--green-bg); color: var(--green); }
+.b-verify { background: var(--amber-bg); color: var(--amber); }
+.mod-title { font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: .5rem; }
+.mod-diff { display: flex; align-items: center; gap: 8px; }
+.diff-bar { display: flex; gap: 3px; }
+.diff-bar span { width: 18px; height: 4px; border-radius: 2px; background: var(--border2); }
+.diff-bar span.on { background: var(--accent); }
+.diff-label { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+
+/* SECTIONS */
+.section { margin-bottom: 2rem; }
+.section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); margin-bottom: .75rem; display: flex; align-items: center; gap: 8px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.intro-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1.25rem 1.5rem; }
+.intro-card p { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+/* LIFECYCLE */
+.lc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lc-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .75rem 1rem; display: flex; gap: 10px; align-items: flex-start; }
+.lc-item p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+/* ROLE GRID */
+.role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.role-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .9rem 1rem; transition: border-color .15s; }
+.role-card:hover { border-color: var(--border2); }
+.role-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.role-abbr { font-family: var(--mono); font-size: 10px; color: var(--accent); margin-bottom: .4rem; }
+.role-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* STEPS */
+.steps { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.step { display: flex; gap: 14px; padding: .85rem 1.25rem; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.step:last-child { border-bottom: none; }
+.step-n { font-family: var(--mono); font-size: 11px; color: var(--accent); min-width: 28px; padding-top: 3px; }
+.step-t { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.step-t strong { color: var(--text); }
+.step-t code { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+/* CHECKS */
+.checks { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.check { display: flex; gap: 12px; padding: .7rem 1.25rem; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.check:last-child { border-bottom: none; }
+.check-icon { color: var(--green); font-size: 13px; padding-top: 3px; flex-shrink: 0; }
+.check span { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.check span code { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+/* TROUBLESHOOT */
+.ts { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.ts-row { display: flex; gap: 14px; padding: .7rem 1.25rem; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.ts-row:last-child { border-bottom: none; }
+.ts-lbl { font-family: var(--mono); font-size: 11px; color: var(--red); min-width: 110px; flex-shrink: 0; padding-top: 3px; }
+.ts-txt { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.ts-txt code { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+/* Q&A */
+.qa-list { display: flex; flex-direction: column; gap: 6px; }
+.qa-item {}
+.qa-q { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: .7rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); user-select: none; transition: all .15s; }
+.qa-q:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.qa-q.open { color: var(--text); border-color: var(--accent); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.qa-chevron { font-size: 13px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+.qa-q.open .qa-chevron { transform: rotate(180deg); color: var(--accent); }
+.qa-a { display: none; padding: .85rem 1rem; background: var(--surface2); border: 1px solid var(--accent); border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; font-size: 13px; color: var(--text2); line-height: 1.7; }
+.qa-a.open { display: block; }
+.qa-a code { background: var(--surface); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+/* BOTTOM NAV */
+.mod-footer { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.fn-btn { font-size: 13px; padding: 8px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--text2); font-family: var(--sans); transition: all .15s; }
+.fn-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.fn-btn:disabled { opacity: .3; cursor: default; }
+.fn-btn.primary { background: var(--accent2); color: var(--accent); border-color: rgba(74,158,255,.3); }
+.fn-btn.primary:hover { background: rgba(74,158,255,.2); }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .shell { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 1rem; gap: 6px; }
+  .logo { display: none; }
+  .nav-section { padding: 0; }
+  .nav-label { display: none; }
+  .nav-item { font-size: 11px; padding: 4px 8px; }
+  .main { padding: 1.5rem; }
+  .lc-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-tag">Training Module</div>
+    <div class="logo-title">MECM Intermediate</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Modules</div>
+    <a class="nav-item active" onclick="goTo(0)"><span class="nav-num">01</span>Site Hierarchy<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(1)"><span class="nav-num">02</span>Client Install<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(2)"><span class="nav-num">03</span>Collections<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(3)"><span class="nav-num">04</span>Software Dist.<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(4)"><span class="nav-num">05</span>Patch Mgmt<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(5)"><span class="nav-num">06</span>OSD<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(6)"><span class="nav-num">07</span>Compliance<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(7)"><span class="nav-num">08</span>Reporting<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(8)"><span class="nav-num">09</span>Boundaries<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span><span class="dp"></span></span></a>
+    <a class="nav-item" onclick="goTo(9)"><span class="nav-num">10</span>SQL & DB<span class="diff-pip"><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp on"></span><span class="dp"></span><span class="dp"></span></span></a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- MODULE 1 -->
+<div class="module active" id="mod0">
+  <div class="mod-header">
+    <div class="mod-meta">
+      <span class="mod-num">MODULE 01 / 10</span>
+      <span class="badge b-pre">Pre-stage</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span>
+    </div>
+    <div class="mod-title">Site Hierarchy & Roles</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span></div><span class="diff-label">6 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>Site Hierarchy defines how MECM is physically and logically organized — how many sites you have, how they relate to each other, and which server roles handle what. Every MECM action flows through this structure: clients check in with their Management Point, pull content from their Distribution Point, and receive updates from the Software Update Point. Design this correctly before anything else — bad hierarchy decisions are expensive to fix.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-pre">Pre-stage</span><p>Design hierarchy, plan SQL instance, allocate VMs, extend AD schema</p></div>
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Install Site Server + SQL, configure MP and DP, verify site status</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Add SUP, Reporting Point, assign clients via boundary groups</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Component status green, clients registering, MP publishing to AD</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Core roles</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Site Server</div><div class="role-abbr">SS</div><div class="role-desc">The brain. Processes all site operations. One per site.</div></div>
+    <div class="role-card"><div class="role-name">Management Point</div><div class="role-abbr">MP</div><div class="role-desc">Clients talk here for policy and inventory. Required role.</div></div>
+    <div class="role-card"><div class="role-name">Distribution Point</div><div class="role-abbr">DP</div><div class="role-desc">Holds content. Clients pull from here. One per subnet ideally.</div></div>
+    <div class="role-card"><div class="role-name">Software Update Point</div><div class="role-abbr">SUP</div><div class="role-desc">Wraps WSUS. Manages patch sync and deployment.</div></div>
+    <div class="role-card"><div class="role-name">SQL Server</div><div class="role-abbr">SQL</div><div class="role-desc">Stores site DB. Separate VM in production.</div></div>
+    <div class="role-card"><div class="role-name">Reporting Services Point</div><div class="role-abbr">RSP</div><div class="role-desc">Hosts SSRS reports. Add after site is stable.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Install order</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 0</div><div class="step-t"><strong>Patch all VMs fully before touching the installer.</strong> Standing rule on every build.</div></div>
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Extend AD schema — run <code>extadsch.exe</code> from MECM media. Requires Schema Admin. One-time.</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Create System Management container in AD, delegate Full Control to the Site Server computer account.</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Install SQL Server 2022 on SQL VM. Collation must be <code>SQL_Latin1_General_CP1_CI_AS</code>.</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Install Windows ADK + WinPE add-on on the Site Server.</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Run Prerequisite Checker. Resolve all errors before proceeding.</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Install Primary Site via setup wizard. Set site code (3 chars — cannot be changed after).</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Verify: Monitoring → Site Status → all green. Check <code>sitecomp.log</code>.</div></div>
+    <div class="step"><div class="step-n">STEP 8</div><div class="step-t">Add Distribution Point role. Configure boundary groups.</div></div>
+    <div class="step"><div class="step-n">STEP 9</div><div class="step-t">Install SUP role. Install WSUS first, do not configure it — let MECM manage it.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Monitoring → Site Status → Component Status — all green</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>System Management container in AD with correct permissions</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>DP shows no errors — check <code>distmgr.log</code></span></div>
+    <div class="check"><span class="check-icon">✓</span><span>SUP first sync completes — check <code>wsyncmgr.log</code></span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Test client registers — check <code>ccmsetup.log</code> on client</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">AD_SCHEMA</div><div class="ts-txt">MP can't publish — verify System Management container and Full Control delegation. Check <code>mpcontrol.log</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">SQL_COLLATION</div><div class="ts-txt">Install fails — must be <code>SQL_Latin1_General_CP1_CI_AS</code>. Wrong collation = rebuild SQL.</div></div>
+    <div class="ts-row"><div class="ts-lbl">PREREQ_FAIL</div><div class="ts-txt">Check <code>ConfigMgrPrereq.log</code> at C:\ root after failed install.</div></div>
+    <div class="ts-row"><div class="ts-lbl">RED_COMPONENT</div><div class="ts-txt">Right-click → Show Messages. Logs at <code>C:\Program Files\Microsoft Configuration Manager\Logs\</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">MP_COMMS</div><div class="ts-txt">Clients not checking in — verify firewall allows 80/443/10123. Check <code>mpcontrol.log</code>.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A — click to reveal</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — Where in the console do you check site component health?<span class="qa-chevron">▾</span></div><div class="qa-a">Monitoring workspace → Site Status → Component Status. Green = OK, yellow = warning, red = critical.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Log file for Management Point communication?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>mpcontrol.log</code> on the site server. Also <code>MP_Relay.log</code> for client message relay issues.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — Required SQL collation and why?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>SQL_Latin1_General_CP1_CI_AS</code> — MECM's DB schema is built against it. Cannot be changed after install without rebuilding SQL.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — What AD container must exist for the MP to publish?<span class="qa-chevron">▾</span></div><div class="qa-a">System Management container under System in AD. Site Server computer account needs Full Control delegated. Without it clients can't discover the MP via AD.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — What is a site code and can it be changed?<span class="qa-chevron">▾</span></div><div class="qa-a">3-character alphanumeric identifier unique to the site (e.g., P01). Cannot be changed after installation.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — What must be installed before the SUP role?<span class="qa-chevron">▾</span></div><div class="qa-a">WSUS must be installed first. Install it but do not configure it — let MECM control WSUS configuration.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — Default log file location on the site server?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>C:\Program Files\Microsoft Configuration Manager\Logs\</code>. Use CMTrace.exe. Client logs at <code>C:\Windows\CCM\Logs\</code>.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — Difference between Primary and Secondary Site?<span class="qa-chevron">▾</span></div><div class="qa-a">Primary Site has its own SQL DB and manages clients directly. Secondary Site uses parent Primary's DB — used for remote locations with limited WAN.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Tool to run before MECM installation?<span class="qa-chevron">▾</span></div><div class="qa-a">Prerequisite Checker — run standalone as <code>prereqchk.exe</code>. Logs to <code>ConfigMgrPrereq.log</code> at C:\ root.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — Two Windows components required on Site Server before setup?<span class="qa-chevron">▾</span></div><div class="qa-a">Windows ADK and the WinPE Add-on for Windows ADK. Must match your MECM version.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" disabled>← Previous</button><button class="fn-btn primary" onclick="goTo(1)">Client Installation →</button></div>
+</div>
+
+<!-- MODULE 2 -->
+<div class="module" id="mod1">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 02 / 10</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Client Installation Methods</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div><span class="diff-label">5 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>The MECM client (CCMSetup.exe) must be installed on every managed device. How it gets there depends on your environment. Client Push is the most common but requires firewall exceptions and admin rights on target. GPO is reliable for domain-joined machines at scale. Task Sequence is best for OSD scenarios. Understanding the right method prevents wasted troubleshooting time chasing silent failures.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Select install method, configure prerequisites (firewall, WMI, admin share)</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Push or trigger client install, monitor in console</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Client appears in Assets and Compliance, heartbeat discovery running</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Methods</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Client Push</div><div class="role-abbr">Most common</div><div class="role-desc">MECM pushes CCMSetup.exe via admin$ share. Requires firewall rules and local admin account.</div></div>
+    <div class="role-card"><div class="role-name">GPO / Logon Script</div><div class="role-abbr">Scale method</div><div class="role-desc">Deploy CCMSetup.exe via GPO startup script. Good for large AD environments.</div></div>
+    <div class="role-card"><div class="role-name">Manual / Script</div><div class="role-abbr">Targeted</div><div class="role-desc">Run CCMSetup.exe directly or via PowerShell. Useful for servers or troubleshooting.</div></div>
+    <div class="role-card"><div class="role-name">Task Sequence</div><div class="role-abbr">OSD only</div><div class="role-desc">Client installed as part of OS deployment. Built into the OSD task sequence automatically.</div></div>
+    <div class="role-card"><div class="role-name">Software Update</div><div class="role-abbr">Upgrade only</div><div class="role-desc">Upgrade existing clients via WSUS/SUP. Not for initial install.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Client push — step by step</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Admin → Site Configuration → Sites → Client Installation Settings → Enable Client Push</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Configure the Client Push Installation account — domain account with local admin rights on targets</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Ensure firewall allows: File/Printer Sharing (TCP 445), WMI (TCP 135 + dynamic), RPC</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Discover devices first via AD System Discovery or Heartbeat Discovery</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Right-click device in console → Install Client</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Monitor: <code>ccm.log</code> on site server, <code>ccmsetup.log</code> on target client</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Client shows in Assets and Compliance → Devices with green checkmark (Active)</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Heartbeat Discovery record exists — DDRs sending every 7 days by default</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Client properties show correct site code assigned</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Hardware inventory running — check Last Hardware Inventory date in console</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">PUSH_FAILS</div><div class="ts-txt">Check admin$ share accessible, WMI running, firewall exceptions in place. Check <code>ccm.log</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">WON'T_REGISTER</div><div class="ts-txt">Boundary group issue — client can't find its MP. Check boundaries and <code>locationservices.log</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">WRONG_SITE</div><div class="ts-txt">Boundary group overlap. Check <code>clientlocation.log</code> for site assignment logic.</div></div>
+    <div class="ts-row"><div class="ts-lbl">GOES_INACTIVE</div><div class="ts-txt">Heartbeat DDR not arriving — check <code>inventoryagent.log</code> and network path to MP.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — Log file to check on the target machine during client push?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>ccmsetup.log</code> at <code>C:\Windows\ccmsetup\Logs\</code>. First stop for any client install failure.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Log file on the site server for client push operations?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>ccm.log</code> in the MECM Logs folder. Shows push initiation, failures, and retry attempts.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — What account does Client Push use and what rights does it need?<span class="qa-chevron">▾</span></div><div class="qa-a">Client Push Installation account — domain account configured in Site Settings. Needs local administrator rights on every target device.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — Where do you enable Client Push in the console?<span class="qa-chevron">▾</span></div><div class="qa-a">Administration → Site Configuration → Sites → right-click site → Client Installation Settings → Client Push Installation tab.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — What ports must be open for client push?<span class="qa-chevron">▾</span></div><div class="qa-a">TCP 445 (SMB/admin$ share), TCP 135 (RPC endpoint mapper), plus dynamic high ports for WMI/RPC. Also TCP 80/443 for client-to-MP post-install.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — How does a client know which site to register with?<span class="qa-chevron">▾</span></div><div class="qa-a">Via Boundary Groups — client's IP/subnet matched to a boundary, which maps to a boundary group, which points to a site and MP.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — What is a DDR and what sends it?<span class="qa-chevron">▾</span></div><div class="qa-a">Data Discovery Record — sent by client via Heartbeat Discovery every 7 days by default. Keeps the client record active in the CM DB.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — Best method for installing the client on 500 new domain-joined PCs?<span class="qa-chevron">▾</span></div><div class="qa-a">GPO startup script or Client Push with automatic discovery. GPO is more reliable at scale and handles machines offline during the initial push window.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Where do you see if a client is active in the console?<span class="qa-chevron">▾</span></div><div class="qa-a">Assets and Compliance → Devices. Client column shows green checkmark (Active) or blank. Activity column shows Last Active timestamp.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — What log shows why a client was assigned to the wrong site?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>clientlocation.log</code> on the client. Shows the full site assignment logic — which boundaries were evaluated and which MP was selected.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(0)">← Site Hierarchy</button><button class="fn-btn primary" onclick="goTo(2)">Collections →</button></div>
+</div>
+
+<!-- MODULE 3 -->
+<div class="module" id="mod2">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 03 / 10</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Collections</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span></div><span class="diff-label">4 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>Collections are the targeting mechanism for everything in MECM — software deployments, patches, task sequences, compliance baselines, and client settings all target a collection. A collection is a group of devices or users defined by rules. Bad collection design deploys software to machines that shouldn't have it, or misses machines that should. Simple concept, dangerous when poorly structured.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Design collection hierarchy, create device/user collections, define membership rules</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Target all deployments — software, patches, task sequences — to collections</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Confirm correct members, check update schedules, validate no overlap</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Collection types & rules</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Device Collection</div><div class="role-abbr">Most used</div><div class="role-desc">Groups computers/servers. Target for software, patches, OSD.</div></div>
+    <div class="role-card"><div class="role-name">User Collection</div><div class="role-abbr">User-centric</div><div class="role-desc">Groups users. Target for user-available apps in Software Center.</div></div>
+    <div class="role-card"><div class="role-name">Direct Rule</div><div class="role-abbr">Static</div><div class="role-desc">Manually added devices. Never auto-updates.</div></div>
+    <div class="role-card"><div class="role-name">Query Rule</div><div class="role-abbr">Dynamic</div><div class="role-desc">WQL query auto-populates membership on schedule.</div></div>
+    <div class="role-card"><div class="role-name">Include Rule</div><div class="role-abbr">Nesting</div><div class="role-desc">Pulls in all members of another collection.</div></div>
+    <div class="role-card"><div class="role-name">Exclude Rule</div><div class="role-abbr">Nesting</div><div class="role-desc">Removes members of another collection. Good for exceptions.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Create a query-based collection</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Assets and Compliance → Device Collections → right-click → Create Device Collection</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Set Limiting Collection — always set to an appropriate parent. Never limit to All Systems for production.</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Add Membership Rule → Query Rule → Edit Query Statement</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Write WQL: <code>SELECT * FROM SMS_R_System WHERE OperatingSystemNameandVersion LIKE '%Server%'</code></div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Set Update Schedule — default 7 days. For critical collections, set to 1 day or use incremental updates.</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Preview collection members before saving — confirm query returns expected results.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Member count matches expectation — right-click collection → Show Members</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Limiting collection is not too broad — avoid targeting All Systems in production</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Update schedule set appropriately for deployment urgency</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>No circular references between Include/Exclude rules</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">MISSING_MEMBERS</div><div class="ts-txt">Query rule not returning devices — check WQL syntax, verify hardware inventory is current.</div></div>
+    <div class="ts-row"><div class="ts-lbl">STALE_MEMBERS</div><div class="ts-txt">Device removed from AD still in collection — update schedule hasn't run or incremental updates disabled.</div></div>
+    <div class="ts-row"><div class="ts-lbl">WRONG_DEPLOYMENT</div><div class="ts-txt">Device in wrong collection — check all query/include rules. Use Deployment tab on device.</div></div>
+    <div class="ts-row"><div class="ts-lbl">PERFORMANCE</div><div class="ts-txt">Too many incremental-update collections hammers SQL. Microsoft recommends max 200 per site.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — What is a Limiting Collection and why does it matter?<span class="qa-chevron">▾</span></div><div class="qa-a">The parent boundary restricting collection membership. A query collection can only contain devices already in its Limiting Collection. Misconfigured limiting collections cause deployments to miss or over-include devices.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — What query language does MECM use for collection rules?<span class="qa-chevron">▾</span></div><div class="qa-a">WQL — WMI Query Language. Similar to SQL SELECT syntax. Example: <code>SELECT * FROM SMS_R_System WHERE Name LIKE 'SRV%'</code></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — Where do you preview collection membership before saving?<span class="qa-chevron">▾</span></div><div class="qa-a">In the collection wizard after writing the query rule, click Preview. Shows expected members based on current inventory data.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — Difference between Direct Rule and Query Rule?<span class="qa-chevron">▾</span></div><div class="qa-a">Direct = static, manually added, never auto-updates. Query = dynamic, auto-populates via WQL on schedule. Use Direct for exceptions, Query for everything else.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — What is Incremental Update and when should you use it?<span class="qa-chevron">▾</span></div><div class="qa-a">Evaluates only recently changed records. Faster but resource-intensive at scale. Use for high-priority collections. Cap: ~200 incremental collections per site.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — How do you exclude specific devices from a collection?<span class="qa-chevron">▾</span></div><div class="qa-a">Add an Exclude Collection rule pointing to a collection containing the devices to exclude. Members of excluded collection are removed even if they match the query rule.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — Where do you see which deployments are targeting a device?<span class="qa-chevron">▾</span></div><div class="qa-a">Assets and Compliance → Devices → right-click device → open properties → Deployments tab.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — Built-in collection to target all managed clients?<span class="qa-chevron">▾</span></div><div class="qa-a">All Systems (device) and All Users. Built-in, cannot be deleted. Never deploy production software directly to All Systems.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — How do you force a collection to update membership immediately?<span class="qa-chevron">▾</span></div><div class="qa-a">Right-click the collection → Update Membership. Forces immediate evaluation outside the schedule.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — What console node holds Device Collections?<span class="qa-chevron">▾</span></div><div class="qa-a">Assets and Compliance workspace → Device Collections.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(1)">← Client Install</button><button class="fn-btn primary" onclick="goTo(3)">Software Distribution →</button></div>
+</div>
+
+<!-- MODULE 4 -->
+<div class="module" id="mod3">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 04 / 10</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Software Distribution</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div><span class="diff-label">5 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>Software Distribution covers getting applications, scripts, and packages onto managed devices. MECM has two models: Applications (modern, detection-method based, supports user-targeting and supersedence) and Packages/Programs (legacy, script-based). Applications are preferred. The deployment process has three phases: create the content object, distribute content to DPs, then deploy to a collection. Miss any phase and the deployment silently fails.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Create Application/Package, set detection method, configure deployment types</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Distribute content to DP, create deployment to target collection</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Monitor deployments, check enforcement state, review failure reasons</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Application vs Package</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Application</div><div class="role-abbr">Modern — use this</div><div class="role-desc">Detection method determines install state. Supports requirements, dependencies, supersedence, user installs.</div></div>
+    <div class="role-card"><div class="role-name">Package/Program</div><div class="role-abbr">Legacy</div><div class="role-desc">Script-based. No detection method. Use only for simple scripts or legacy software.</div></div>
+    <div class="role-card"><div class="role-name">Detection Method</div><div class="role-abbr">Critical</div><div class="role-desc">Registry key, file/folder, or MSI product code. Tells MECM if app is installed. Get this wrong and apps re-install constantly.</div></div>
+    <div class="role-card"><div class="role-name">Deployment Type</div><div class="role-abbr">Install logic</div><div class="role-desc">Actual install command, detection method, requirements, and user experience settings within an Application.</div></div>
+    <div class="role-card"><div class="role-name">Requirements</div><div class="role-abbr">Targeting filter</div><div class="role-desc">OS version, disk space, architecture rules. MECM evaluates before installing.</div></div>
+    <div class="role-card"><div class="role-name">Supersedence</div><div class="role-abbr">Upgrades</div><div class="role-desc">Links new version to old. Auto-uninstalls old and installs new during deployment.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Deploy an application</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Software Library → Application Management → Applications → Create Application</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Set install command (e.g., <code>setup.exe /S</code>), uninstall command, and detection method</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Configure User Experience: install for System or User, Software Center behavior, restart behavior</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Distribute Content: right-click Application → Distribute Content → select DP or DP Group</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Wait for content distribution — check Monitoring → Distribution Status</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Deploy: right-click Application → Deploy → select collection, purpose (Required vs Available), schedule</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Monitor: Monitoring → Deployments → select deployment → view status by device</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Content distribution completed — Monitoring → Content Status shows all DPs green</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Detection method validated — right-click app → Simulate Deployment on test machine</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Deployment shows in target device's Software Center</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Monitoring → Deployments shows Success count increasing</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">CONTENT_MISSING</div><div class="ts-txt">Content not distributed to DP or DP in wrong boundary group. Check <code>datatransferservice.log</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">APP_REINSTALLS</div><div class="ts-txt">Detection method wrong. Check <code>AppDiscovery.log</code> on client.</div></div>
+    <div class="ts-row"><div class="ts-lbl">NOT_IN_SW_CENTER</div><div class="ts-txt">Deployment type set to System but check User Experience settings. Check collection membership.</div></div>
+    <div class="ts-row"><div class="ts-lbl">INSTALL_FAILS</div><div class="ts-txt">Check <code>AppEnforce.log</code> on client for exact error and return code.</div></div>
+    <div class="ts-row"><div class="ts-lbl">REQUIREMENTS</div><div class="ts-txt"><code>AppDiscovery.log</code> shows requirements evaluation. Check OS version, disk space, arch rules.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — Three types of detection methods?<span class="qa-chevron">▾</span></div><div class="qa-a">File/Folder (check if specific file exists), Registry (check registry key/value), MSI Product Code (check Windows Installer DB for GUID).</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Difference between Required and Available deployment?<span class="qa-chevron">▾</span></div><div class="qa-a">Required = forced install on schedule, no user choice. Available = appears in Software Center for user to install voluntarily.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — Log for application installation enforcement on client?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>AppEnforce.log</code> at <code>C:\Windows\CCM\Logs\</code>. Shows install command run, return code, detection result post-install.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — What must happen before deploying an application?<span class="qa-chevron">▾</span></div><div class="qa-a">Content must be distributed to a DP first. Deploying without content = clients fail with "content unavailable."</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — Where do you monitor per-device deployment status?<span class="qa-chevron">▾</span></div><div class="qa-a">Monitoring workspace → Deployments → select deployment → Asset Details tab. Shows status per device: Success, In Progress, Error, Requirements Not Met.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — What is a Deployment Type?<span class="qa-chevron">▾</span></div><div class="qa-a">The actual install logic within an Application. An Application can have multiple Deployment Types for different scenarios (x64 vs x86, MSI vs EXE). MECM evaluates requirements to pick the right one.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — What does Simulate Deployment do?<span class="qa-chevron">▾</span></div><div class="qa-a">Runs detection method evaluation only — no actual install. Verifies detection logic before deploying to production.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — What is Supersedence?<span class="qa-chevron">▾</span></div><div class="qa-a">Links new app version to old. When new version deploys, it auto-uninstalls the superseded version first. Configure during upgrades to prevent both versions co-existing.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Log for why a client isn't detecting an installed app?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>AppDiscovery.log</code> — shows detection method evaluation results, exactly what MECM checked and found.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — Where is content status monitored after distributing to a DP?<span class="qa-chevron">▾</span></div><div class="qa-a">Monitoring workspace → Distribution Status → Content Status. Shows per-DP state. Also check <code>distmgr.log</code> on site server.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(2)">← Collections</button><button class="fn-btn primary" onclick="goTo(4)">Patch Management →</button></div>
+</div>
+
+<!-- MODULE 5 -->
+<div class="module" id="mod4">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 05 / 10</span><span class="badge b-pre">Pre-stage</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Patch Management (SUP/WSUS)</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span></div><span class="diff-label">7 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>Patch Management uses the Software Update Point (SUP) — a WSUS wrapper — to sync, deploy, and enforce patches. MECM owns WSUS entirely; never approve updates in the WSUS console directly. Flow: sync updates from Microsoft → filter → create Software Update Groups → deploy via Deployment Packages. Automatic Deployment Rules (ADRs) automate recurring Patch Tuesday cycles.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-pre">Pre-stage</span><p>Install WSUS role, configure SUP in MECM, set sync schedule and classifications</p></div>
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Run initial sync, review synced updates, create Software Update Groups</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Create Deployment Package, deploy to pilot then production. Set ADRs.</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Monitor compliance, review non-compliant devices, check scan errors</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key concepts</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">SUP</div><div class="role-abbr">Software Update Point</div><div class="role-desc">MECM role that wraps WSUS. Syncs from Microsoft, pushes policy to clients.</div></div>
+    <div class="role-card"><div class="role-name">SUG</div><div class="role-abbr">Software Update Group</div><div class="role-desc">Container for a set of updates to deploy together. Like a patch bundle.</div></div>
+    <div class="role-card"><div class="role-name">Deployment Package</div><div class="role-abbr">Content</div><div class="role-desc">Downloads update binaries and stores on UNC share for DP distribution.</div></div>
+    <div class="role-card"><div class="role-name">ADR</div><div class="role-abbr">Auto Deployment Rule</div><div class="role-desc">Automatically creates SUGs and deployments on schedule. Patch Tuesday automation.</div></div>
+    <div class="role-card"><div class="role-name">Compliance</div><div class="role-abbr">State reporting</div><div class="role-desc">Clients report installed updates. Compliance = % of required updates installed.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Deploy Patch Tuesday — steps</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Software Library → Software Updates → Synchronize Software Updates after Patch Tuesday</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Filter current month's Critical + Security updates for your OS versions</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Create Software Update Group → add filtered updates</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Download updates: right-click SUG → Download → create Deployment Package → UNC share on DP</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Deploy to Pilot collection first — Required, deadline 7 days out</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Monitor pilot compliance for 48-72 hours. Verify no breaking issues.</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Deploy same SUG to Production — Required, deadline 14 days out, respect maintenance windows</div></div>
+    <div class="step"><div class="step-n">STEP 8</div><div class="step-t">Monitor Monitoring → Software Update Deployments for compliance %</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>SUP sync completed — Software Library → Software Updates → Last Sync Time</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Clients scanning for updates — check <code>WUAHandler.log</code> on client</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Deployment Package distributed to DPs</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Compliance rising over time in Monitoring → Deployments</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">SYNC_FAILS</div><div class="ts-txt">Check <code>wsyncmgr.log</code>. Common: WSUS not connected to internet, SSL cert mismatch, WSUS DB corrupted.</div></div>
+    <div class="ts-row"><div class="ts-lbl">NOT_SCANNING</div><div class="ts-txt">Check <code>WUAHandler.log</code> and <code>ScanAgent.log</code>. SUP not in boundary group, or WSUS port mismatch (8530/8531).</div></div>
+    <div class="ts-row"><div class="ts-lbl">0%_COMPLIANCE</div><div class="ts-txt">Content not on DP, or clients haven't received policy. Check <code>UpdatesDeployment.log</code> on client.</div></div>
+    <div class="ts-row"><div class="ts-lbl">WSUS_CONFLICT</div><div class="ts-txt">Never approve/decline in WSUS console — MECM owns it. Manual changes cause sync conflicts.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — What is an ADR and what problem does it solve?<span class="qa-chevron">▾</span></div><div class="qa-a">Automatic Deployment Rule. Auto-creates SUGs, downloads updates, deploys on schedule. Eliminates manual Patch Tuesday process.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Log to check if a client is scanning for updates?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>WUAHandler.log</code> — Windows Update Agent scan activity. Also <code>ScanAgent.log</code> for scan initiation logic.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — What is a Software Update Group?<span class="qa-chevron">▾</span></div><div class="qa-a">A container grouping specific updates for deployment. Think patch bundle for a given month. You deploy the SUG to a collection, not individual updates.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — WSUS/SUP default ports?<span class="qa-chevron">▾</span></div><div class="qa-a">HTTP: 8530, HTTPS: 8531. Must be open between clients and the SUP. #1 cause of clients not scanning.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — What happens if you approve updates in the WSUS console?<span class="qa-chevron">▾</span></div><div class="qa-a">MECM owns WSUS — direct changes cause sync conflicts and break MECM's update management. Never approve/decline in WSUS when MECM manages it.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — What is a Deployment Package?<span class="qa-chevron">▾</span></div><div class="qa-a">Container holding actual update binary files. Downloads from Microsoft and stores on UNC share for DP distribution. Multiple SUGs can share one Deployment Package.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — Log file for SUP sync failures?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>wsyncmgr.log</code> on the site server. Shows full sync cycle — categories, errors, duration.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — What update classifications to sync for standard Windows?<span class="qa-chevron">▾</span></div><div class="qa-a">Critical Updates, Security Updates, Update Rollups, Service Packs, Definition Updates. Avoid Driver updates unless managing drivers via MECM.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Where do you see per-device patch compliance?<span class="qa-chevron">▾</span></div><div class="qa-a">Monitoring → Software Update Deployments → select deployment → right-click → View Status. Per-device: Compliant, Non-Compliant, Error, Unknown.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — Log showing update deployment enforcement on a client?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>UpdatesDeployment.log</code> on client. Shows updates in scope, enforcement state, reboot behavior. Also <code>WindowsUpdate.log</code> for WUA install activity.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(3)">← Software Dist.</button><button class="fn-btn primary" onclick="goTo(5)">OSD →</button></div>
+</div>
+
+<!-- MODULE 6 -->
+<div class="module" id="mod5">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 06 / 10</span><span class="badge b-pre">Pre-stage</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Operating System Deployment (OSD)</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></div><span class="diff-label">9 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>OSD automates full OS installations via Task Sequences. A Task Sequence is a series of ordered steps executed in WinPE or Windows: partition disk, apply image, install drivers, install software, join domain. OSD is the hardest module because it chains many dependencies: boot images, OS images, driver packages, task sequences, PXE, and boundary groups must all be correct. One broken link silently fails the whole deployment.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-pre">Pre-stage</span><p>Configure PXE on DP, build boot image, capture/import OS image, create driver packages</p></div>
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Build task sequence, test on single device, validate all steps</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Deploy TS to All Unknown Computers for bare metal; device collection for refresh</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Check SMSTS.log, domain join, client registered, apps installed</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key components</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Boot Image</div><div class="role-abbr">WinPE</div><div class="role-desc">Minimal Windows PE loaded before OS install. Must match ADK version.</div></div>
+    <div class="role-card"><div class="role-name">OS Image</div><div class="role-abbr">WIM file</div><div class="role-desc">Captured or Microsoft-provided Windows image. Applied to disk during TS.</div></div>
+    <div class="role-card"><div class="role-name">Task Sequence</div><div class="role-abbr">TS</div><div class="role-desc">Ordered steps MECM executes. Can be fully automated or prompt for input.</div></div>
+    <div class="role-card"><div class="role-name">Driver Package</div><div class="role-abbr">Hardware</div><div class="role-desc">Drivers injected during WinPE or post-OS phase. Must match hardware model.</div></div>
+    <div class="role-card"><div class="role-name">PXE</div><div class="role-abbr">Network boot</div><div class="role-desc">Boots devices over network to receive TS. Enable on DP. Requires DHCP options 66/67.</div></div>
+    <div class="role-card"><div class="role-name">Unknown Computers</div><div class="role-abbr">Bare metal</div><div class="role-desc">Built-in collection for devices not yet in MECM DB.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Bare metal TS — steps</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 0</div><div class="step-t"><strong>Patch site server and all VMs. Confirm ADK version matches MECM version before building boot image.</strong></div></div>
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Enable PXE on DP — Administration → Distribution Points → DP Properties → PXE tab</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Distribute Boot Image to PXE-enabled DP</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Import OS Image (.wim) — Software Library → OS → Operating System Images → Add</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Create Driver Package for target hardware — import INF drivers, distribute to DP</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Create Task Sequence: Software Library → OS → Task Sequences → Create → Install existing image package</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Edit TS: Partition Disk → Apply OS → Apply Windows Settings → Apply Drivers → Setup Windows and ConfigMgr → Install Software → Domain Join</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Deploy TS to All Unknown Computers — Available for testing, Required for production</div></div>
+    <div class="step"><div class="step-n">STEP 8</div><div class="step-t">PXE boot target device — F12 on physical, change boot order in VM BIOS</div></div>
+    <div class="step"><div class="step-n">STEP 9</div><div class="step-t">Monitor: <code>SMSTS.log</code> in WinPE at <code>X:\Windows\Temp\SMSTSLog\</code></div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Boot image deployed to PXE-enabled DP before any PXE boot attempt</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>DHCP scope options 66 (TFTP server) and 67 (boot file) configured</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Device shows in MECM console after TS with correct site assignment</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Domain join step succeeded — device in correct OU in AD</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>SMSTS.log shows no errors, TS exit code 0</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">PXE_NO_BOOT</div><div class="ts-txt">DHCP options 66/67 missing, boot image not on DP, or PXE not enabled. Check <code>pxecontrol.log</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">TS_FAILS_WINPE</div><div class="ts-txt">Read <code>SMSTS.log</code> at <code>X:\Windows\Temp\SMSTSLog\</code>. Press F8 for command prompt.</div></div>
+    <div class="ts-row"><div class="ts-lbl">DRIVER_MISSING</div><div class="ts-txt">NIC/storage driver missing in WinPE. Import correct INF driver, add Apply Driver Package step with hardware model condition.</div></div>
+    <div class="ts-row"><div class="ts-lbl">DOMAIN_JOIN_FAILS</div><div class="ts-txt">Service account needs rights to create computer objects in target OU. Check DNS in WinPE first.</div></div>
+    <div class="ts-row"><div class="ts-lbl">CLIENT_NOT_REG</div><div class="ts-txt">Setup Windows and ConfigMgr step — verify correct site code and MP. Check boundary group covers deployment subnet.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — What is SMSTS.log and where is it during WinPE?<span class="qa-chevron">▾</span></div><div class="qa-a">Master Task Sequence log — records every step, success/failure, error codes. In WinPE: <code>X:\Windows\Temp\SMSTSLog\SMSTS.log</code>. After OS applies: <code>C:\Windows\CCM\Logs\SMSTS.log</code>.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — What are DHCP scope options 66 and 67?<span class="qa-chevron">▾</span></div><div class="qa-a">Option 66 = TFTP boot server IP (your PXE-enabled DP). Option 67 = boot file name. Required for PXE — without these DHCP hands out an IP but doesn't tell the client where to boot from.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — How do you get a command prompt during WinPE?<span class="qa-chevron">▾</span></div><div class="qa-a">Press F8 (must be enabled in boot image properties → enable command support). Opens cmd for navigating to SMSTS.log and running diagnostics.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — Collection for bare metal deployments?<span class="qa-chevron">▾</span></div><div class="qa-a">All Unknown Computers — built-in collection for devices that PXE booted but aren't yet in the MECM DB.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — Difference between OS Image and Boot Image?<span class="qa-chevron">▾</span></div><div class="qa-a">Boot Image = WinPE — loads first via PXE, runs TS engine, partitions disk. OS Image = full Windows WIM applied to disk. Both required.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — What TS step installs the MECM client?<span class="qa-chevron">▾</span></div><div class="qa-a">Setup Windows and ConfigMgr — installs CCMSetup, specifies site code and MP, initiates client registration. Built-in TS step.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — ADK components required for OSD?<span class="qa-chevron">▾</span></div><div class="qa-a">Windows ADK (Deployment Tools component) and WinPE Add-on. ADK version must match MECM version's supported matrix.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — TS variable that controls restart at end?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>SMSTSRebootRequested</code> set to TRUE triggers restart. <code>OSDRebootWaitTime</code> controls the countdown timer.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — How do you inject drivers for a specific hardware model?<span class="qa-chevron">▾</span></div><div class="qa-a">Create a Driver Package for that model, add Apply Driver Package step in TS with WMI condition: <code>SELECT * FROM Win32_ComputerSystem WHERE Model LIKE '%YourModel%'</code></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — What is prestaged media and when to use it?<span class="qa-chevron">▾</span></div><div class="qa-a">A WIM written to a hard drive/USB before deployment. Used when PXE isn't available (remote sites, no network boot). Device boots from media, then contacts MECM for policy.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(4)">← Patch Mgmt</button><button class="fn-btn primary" onclick="goTo(6)">Compliance →</button></div>
+</div>
+
+<!-- MODULE 7 -->
+<div class="module" id="mod6">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 07 / 10</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Compliance Settings (DCM)</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span></div><span class="diff-label">6 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>Desired Configuration Management (DCM) lets you define settings devices should have — registry keys, file content, script outputs, WMI values — and measure compliance. Configuration Items (CIs) define the check. Configuration Baselines group CIs and are deployed to collections. Clients evaluate and report Compliant or Non-Compliant. DCM can also remediate automatically by pushing the correct value when a check fails.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Define Configuration Items, group into Baselines</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Deploy baselines to device collections, enable remediation</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Review compliance reports, identify non-compliant devices, investigate CI failures</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key concepts</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Configuration Item</div><div class="role-abbr">CI</div><div class="role-desc">A single compliance check — registry value, script result, file exists, WMI query.</div></div>
+    <div class="role-card"><div class="role-name">Configuration Baseline</div><div class="role-abbr">CB</div><div class="role-desc">Collection of CIs deployed together. The unit you deploy to a collection.</div></div>
+    <div class="role-card"><div class="role-name">Remediation</div><div class="role-abbr">Auto-fix</div><div class="role-desc">When non-compliant, MECM applies the correct value. Enable per CI and per deployment.</div></div>
+    <div class="role-card"><div class="role-name">Setting Types</div><div class="role-abbr">Flexibility</div><div class="role-desc">Registry, File, Script (PowerShell), WMI, IIS, SQL, XML, LDAP.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Create CI + Baseline</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Assets and Compliance → Compliance Settings → Configuration Items → Create Configuration Item</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Select type: Windows Desktops and Servers. Name clearly: e.g., "Check - RDP Enabled"</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Add Setting: Registry → <code>HKLM\System\CurrentControlSet\Control\Terminal Server</code>, value <code>fDenyTSConnections</code></div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Set Compliance Rule: value must equal 0. Enable Remediate if non-compliant.</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Create Configuration Baseline → Add CI → save</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Deploy Baseline to collection → enable Remediate non-compliant → set evaluation schedule</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Monitor: Assets and Compliance → Deployments → select baseline → View Status</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Baseline deployed and evaluation cycle has run at least once</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Compliant % tracking upward after remediation enabled</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Non-compliant devices — open device properties → Configurations tab for per-CI results</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">ALL_NONCOMPLIANT</div><div class="ts-txt">Setting path or value wrong. Test registry path manually on sample device. Check <code>DCMAgent.log</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">REMED_NOT_WORK</div><div class="ts-txt">Remediation must be enabled both on CI setting AND on baseline deployment. Check both locations.</div></div>
+    <div class="ts-row"><div class="ts-lbl">SCRIPT_CI_FAILS</div><div class="ts-txt">PowerShell must return specific value. Check execution policy and output format. Check <code>DCMAgent.log</code>.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — Difference between CI and Baseline?<span class="qa-chevron">▾</span></div><div class="qa-a">CI = single compliance check (one registry key). Baseline = collection of CIs grouped together. You deploy Baselines to collections, not individual CIs.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Where do you see per-device CI compliance results?<span class="qa-chevron">▾</span></div><div class="qa-a">Assets and Compliance → Devices → open device properties → Configurations tab. Shows each deployed baseline and per-CI state.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — Log file on client for DCM evaluation?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>DCMAgent.log</code> — shows baseline evaluation, CI checks, remediation attempts, results.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — What setting types can a CI check?<span class="qa-chevron">▾</span></div><div class="qa-a">Registry, File/Folder, Script (PowerShell, VBScript, JScript), WMI, IIS Metabase, SQL Server query, XML file, LDAP, Assembly.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — How to enable auto-remediation?<span class="qa-chevron">▾</span></div><div class="qa-a">Two places: (1) CI Compliance Rule — check "Remediate noncompliant rules when supported." (2) Baseline Deployment — enable same setting. Both must be checked.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — Can a script CI write back to the device?<span class="qa-chevron">▾</span></div><div class="qa-a">Yes — separate Discovery script (read check) and Remediation script (applies fix). If non-compliant, MECM runs the remediation script.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — Default evaluation schedule?<span class="qa-chevron">▾</span></div><div class="qa-a">7 days. Can go as low as 1 hour for critical checks. Force immediate: Control Panel → Configuration Manager → Configurations tab → Evaluate.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — Where are Configuration Baselines in the console?<span class="qa-chevron">▾</span></div><div class="qa-a">Assets and Compliance workspace → Compliance Settings → Configuration Baselines.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Can you import pre-built CIs from Microsoft?<span class="qa-chevron">▾</span></div><div class="qa-a">Yes — Microsoft publishes Security Compliance Baselines as .cab files importable via Import Configuration Data. Saves building from scratch.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — Difference between Compliant, Non-Compliant, and Error?<span class="qa-chevron">▾</span></div><div class="qa-a">Compliant = all rules met. Non-Compliant = at least one rule failed. Error = CI evaluation itself failed (script error, WMI timeout, permission denied) — fix errors before trusting compliance numbers.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(5)">← OSD</button><button class="fn-btn primary" onclick="goTo(7)">Reporting →</button></div>
+</div>
+
+<!-- MODULE 8 -->
+<div class="module" id="mod7">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 08 / 10</span><span class="badge b-stage">Stage</span><span class="badge b-deploy">Deploy</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Reporting (SSRS)</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span></div><span class="diff-label">7 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>MECM reporting uses SQL Server Reporting Services (SSRS) via the Reporting Services Point role. Over 400 built-in reports cover software inventory, patch compliance, hardware inventory, deployments, and more. Custom reports are built against MECM SQL views (v_ prefix) — never raw tables. Knowing the key views lets you answer any operational question. Reports can be subscribed to and emailed on schedule.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Install Reporting Services Point role, configure SSRS data source</p></div>
+    <div class="lc-item"><span class="badge b-deploy">Deploy</span><p>Run built-in reports, build custom SQL reports, set up subscriptions</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Reports return accurate data, subscriptions delivering, permissions correct</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key views to know</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">v_R_System</div><div class="role-abbr">Core device table</div><div class="role-desc">All discovered systems, OS, last logon, AD info. Join key: ResourceID.</div></div>
+    <div class="role-card"><div class="role-name">v_GS_INSTALLED_SOFTWARE</div><div class="role-abbr">Software inventory</div><div class="role-desc">All installed applications per device.</div></div>
+    <div class="role-card"><div class="role-name">v_GS_PROCESSOR</div><div class="role-abbr">Hardware</div><div class="role-desc">CPU data per device from hardware inventory.</div></div>
+    <div class="role-card"><div class="role-name">v_UpdateComplianceStatus</div><div class="role-abbr">Patches</div><div class="role-desc">Per-device per-update compliance state.</div></div>
+    <div class="role-card"><div class="role-name">v_DeploymentSummary</div><div class="role-abbr">Deployments</div><div class="role-desc">High-level deployment results — success, failure, pending counts.</div></div>
+    <div class="role-card"><div class="role-name">v_Collection</div><div class="role-abbr">Collections</div><div class="role-desc">All collection definitions and metadata.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Setup reporting</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Install SQL Server Reporting Services (SSRS) on SQL VM or dedicated server</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Configure SSRS — run Reporting Services Configuration Manager, set service account and Web Service URL</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">In MECM: Administration → Site Configuration → Servers → Add Reporting Services Point</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Point to SSRS instance. Reporting account needs db_datareader on CM DB.</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Wait for 400+ reports to deploy to SSRS — check <code>srsrp.log</code></div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Run reports: Monitoring → Reporting → Reports → right-click → Run</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Custom reports: build SQL against v_ views in Report Builder, upload .rdl to SSRS</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Monitoring → Reporting → Reports node shows 400+ reports</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Test run a built-in report successfully</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>SSRS Report Manager URL accessible from admin workstation</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Reporting account has db_datareader on CM database</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">NO_REPORTS</div><div class="ts-txt">RSP not configured or SSRS service down. Check <code>srsrp.log</code>. Verify SSRS Web Service URL responds.</div></div>
+    <div class="ts-row"><div class="ts-lbl">REPORT_ERRORS</div><div class="ts-txt">Permission issue — reporting account needs db_datareader on CM DB.</div></div>
+    <div class="ts-row"><div class="ts-lbl">STALE_DATA</div><div class="ts-txt">Reports pull live from CM DB. Stale results = hardware/software inventory not running on clients.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — Role required for reporting?<span class="qa-chevron">▾</span></div><div class="qa-a">Reporting Services Point (RSP). Requires SSRS to already be installed and configured.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — SQL view containing all discovered devices?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>v_R_System</code> — join to v_GS_* views using ResourceID for hardware/software data.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — Where in the console do you run built-in reports?<span class="qa-chevron">▾</span></div><div class="qa-a">Monitoring workspace → Reporting → Reports. Organized in folders by category. Right-click → Run.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — Permission needed on CM DB for reporting account?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>db_datareader</code> — read-only. Do not grant db_owner.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — Tool to build custom MECM reports?<span class="qa-chevron">▾</span></div><div class="qa-a">SQL Server Report Builder (free). Build against v_ views, save as .rdl, upload to SSRS or import via console.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — Why query v_ views instead of raw tables?<span class="qa-chevron">▾</span></div><div class="qa-a">v_ views are Microsoft-supported, documented, and stable across MECM updates. Raw tables change schema between versions and are unsupported.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — Log file for Reporting Services Point issues?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>srsrp.log</code> on site server. Shows RSP configuration, report deployment to SSRS, connection errors.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — How to schedule a report to be emailed?<span class="qa-chevron">▾</span></div><div class="qa-a">In SSRS Report Manager (browser) → navigate to report → Subscribe → configure email delivery, schedule, format. Requires SSRS SMTP settings configured.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — SQL view for per-device patch compliance?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>v_UpdateComplianceStatus</code> — join to <code>v_UpdateInfo</code> for update details and <code>v_R_System</code> for device info.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — How many built-in reports does MECM provide?<span class="qa-chevron">▾</span></div><div class="qa-a">Over 400. Covering hardware/software inventory, deployments, patch compliance, OSD, client status, and more.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(6)">← Compliance</button><button class="fn-btn primary" onclick="goTo(8)">Boundaries →</button></div>
+</div>
+
+<!-- MODULE 9 -->
+<div class="module" id="mod8">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 09 / 10</span><span class="badge b-pre">Pre-stage</span><span class="badge b-stage">Stage</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">Boundaries & Boundary Groups</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span></div><span class="diff-label">6 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>Boundaries and Boundary Groups define which site systems (MPs, DPs, SUPs) a client uses based on its network location. A Boundary is a network definition. A Boundary Group links boundaries to site systems. Clients match their IP to a Boundary, find the Boundary Group, and connect to the Site Systems in that group. Misconfigured boundary groups are the #1 silent failure in MECM — clients register but pull from the wrong DP or fall back to slow links.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-pre">Pre-stage</span><p>Map network subnets to boundaries before installing clients</p></div>
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Create boundary groups, assign site systems, configure fallback</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Confirm clients use correct MP and DP, no unexpected fallback</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key concepts</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Boundary</div><div class="role-abbr">Network definition</div><div class="role-desc">IP Subnet, IP Range, AD Site, or IPv6 Prefix.</div></div>
+    <div class="role-card"><div class="role-name">Boundary Group</div><div class="role-abbr">Logical container</div><div class="role-desc">Links boundaries to site systems. Clients use systems in their matched group.</div></div>
+    <div class="role-card"><div class="role-name">Default BG</div><div class="role-abbr">Fallback</div><div class="role-desc">Built-in catch-all. Don't add DPs here without intent.</div></div>
+    <div class="role-card"><div class="role-name">Fallback</div><div class="role-abbr">Neighbor BG</div><div class="role-desc">Configure neighbor boundary groups for content fallback. Set fallback time.</div></div>
+    <div class="role-card"><div class="role-name">Site Assignment</div><div class="role-abbr">Primary Site</div><div class="role-desc">Boundary group can determine which site a client is assigned to.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Configure boundary groups</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Administration → Hierarchy Configuration → Boundaries → Create Boundary → IP Subnet</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Administration → Boundary Groups → Create Boundary Group</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Boundaries tab: add the subnet boundaries that belong to this group</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">References tab: add Site Systems — select your MP, DP, and SUP</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Check "Use this boundary group for site assignment" if clients should auto-assign here</div></div>
+    <div class="step"><div class="step-n">STEP 6</div><div class="step-t">Configure fallback: Relationships tab → add neighbor boundary group with fallback time (e.g., 60 min)</div></div>
+    <div class="step"><div class="step-n">STEP 7</div><div class="step-t">Test: install client on subnet device, verify correct MP and DP via <code>locationservices.log</code></div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>Every client subnet covered by at least one boundary — no orphaned subnets</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Each boundary group has at least one MP and one DP assigned</span></div>
+    <div class="check"><span class="check-icon">✓</span><span><code>LocationServices.log</code> shows correct MP selected for subnet</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Default Boundary Group does not contain DPs unless intentional</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">NO_MATCH</div><div class="ts-txt">Client IP not in any boundary — falls to Default BG. Check <code>locationservices.log</code> for "No matching boundary."</div></div>
+    <div class="ts-row"><div class="ts-lbl">WRONG_DP</div><div class="ts-txt">Multiple overlapping boundary groups for same subnet. Check for subnet conflicts in Administration → Boundaries.</div></div>
+    <div class="ts-row"><div class="ts-lbl">CONTENT_NOT_FOUND</div><div class="ts-txt">Content on DP but not in client's boundary group. Verify DP is in correct boundary group References tab.</div></div>
+    <div class="ts-row"><div class="ts-lbl">SLOW_FALLBACK</div><div class="ts-txt">Fallback time too long — reduce for fast-link environments.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — Difference between a Boundary and a Boundary Group?<span class="qa-chevron">▾</span></div><div class="qa-a">Boundary = network definition. Boundary Group = container linking boundaries to site systems. A Boundary alone does nothing — must be in a group.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Four boundary types?<span class="qa-chevron">▾</span></div><div class="qa-a">IP Subnet, IP Address Range (start-end), Active Directory Site name, IPv6 Prefix.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — What happens if a client's IP doesn't match any boundary?<span class="qa-chevron">▾</span></div><div class="qa-a">Falls to Default Site Boundary Group. If that group has no site systems, client may register but can't find a local DP — content fails.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — Log to check which MP a client selected?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>LocationServices.log</code> on the client. Shows boundary evaluation, MP selection, and DP location requests.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — Where do you assign a DP to a boundary group?<span class="qa-chevron">▾</span></div><div class="qa-a">Administration → Boundary Groups → open group → References tab → Add → select the DP.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — What is the Default Site Boundary Group?<span class="qa-chevron">▾</span></div><div class="qa-a">Built-in catch-all. Clients not matching any other group fall here. Also the fallback target for neighbor relationships. Don't add DPs here unless you want all unmatched clients downloading from them.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — What is a fallback relationship?<span class="qa-chevron">▾</span></div><div class="qa-a">A configured neighbor group that a client tries for content after a time threshold. Configured in Boundary Group → Relationships tab.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — Can one boundary belong to multiple boundary groups?<span class="qa-chevron">▾</span></div><div class="qa-a">Yes — but causes overlap. Client matches multiple groups and MECM uses all matched site systems, causing unexpected DP selection. Keep boundaries in one group unless intentional.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Setting in a boundary group for automatic site assignment?<span class="qa-chevron">▾</span></div><div class="qa-a">General tab → check "Use this boundary group for site assignment."</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — For your lab (mypdomain 172.16.0.x, mybdomain 191.16.0.x) — minimum boundary setup?<span class="qa-chevron">▾</span></div><div class="qa-a">One Boundary per subnet. One Boundary Group per domain linking each subnet to that domain's MP, DP, and SUP. Separate groups prevent cross-domain content routing.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(7)">← Reporting</button><button class="fn-btn primary" onclick="goTo(9)">SQL & Database →</button></div>
+</div>
+
+<!-- MODULE 10 -->
+<div class="module" id="mod9">
+  <div class="mod-header">
+    <div class="mod-meta"><span class="mod-num">MODULE 10 / 10</span><span class="badge b-pre">Pre-stage</span><span class="badge b-stage">Stage</span><span class="badge b-verify">Verify</span></div>
+    <div class="mod-title">SQL & the CM Database</div>
+    <div class="mod-diff"><div class="diff-bar"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div><span class="diff-label">8 / 10 difficulty</span></div>
+  </div>
+  <div class="section"><div class="section-label">What it is</div><div class="intro-card"><p>The MECM site database stores everything — device inventory, deployments, compliance, collections, patch status, and site config. SQL health equals MECM health. A slow or full SQL DB causes console slowness, deployment failures, and inaccurate reports. You don't need to be a DBA, but you need the key views, maintenance tasks, sizing rules, backup strategy, and how to query for operational data.</p></div></div>
+  <div class="section"><div class="section-label">Lifecycle placement</div><div class="lc-grid">
+    <div class="lc-item"><span class="badge b-pre">Pre-stage</span><p>Size SQL VM correctly, configure collation, set memory limits, plan backup</p></div>
+    <div class="lc-item"><span class="badge b-stage">Stage</span><p>Install SQL, configure maintenance, enable CM DB backup task</p></div>
+    <div class="lc-item"><span class="badge b-verify">Verify</span><p>Monitor DB size, fragmentation, backup jobs, SQL error log</p></div>
+  </div></div>
+  <div class="section"><div class="section-label">SQL requirements & sizing</div><div class="role-grid">
+    <div class="role-card"><div class="role-name">Collation</div><div class="role-abbr">Required</div><div class="role-desc">SQL_Latin1_General_CP1_CI_AS — set at SQL install. Non-negotiable.</div></div>
+    <div class="role-card"><div class="role-name">SQL Memory</div><div class="role-abbr">Cap it</div><div class="role-desc">Set max memory = total RAM minus 4-8GB. Default unlimited starves OS.</div></div>
+    <div class="role-card"><div class="role-name">DB Files</div><div class="role-abbr">Placement</div><div class="role-desc">Separate .mdf and .ldf onto different disks where possible.</div></div>
+    <div class="role-card"><div class="role-name">CM DB Name</div><div class="role-abbr">Convention</div><div class="role-desc">Default: CM_[SiteCode] e.g., CM_P01. Never rename after creation.</div></div>
+    <div class="role-card"><div class="role-name">SQL Version</div><div class="role-abbr">MECM 2509</div><div class="role-desc">SQL Server 2022 required.</div></div>
+    <div class="role-card"><div class="role-name">TempDB</div><div class="role-abbr">Performance</div><div class="role-desc">Set TempDB file count = CPU core count (max 8). Reduces allocation contention.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key operational views</div><div class="steps">
+    <div class="step"><div class="step-n">VIEW</div><div class="step-t"><code>v_R_System</code> — all discovered devices. Core join table via ResourceID.</div></div>
+    <div class="step"><div class="step-n">VIEW</div><div class="step-t"><code>v_GS_INSTALLED_SOFTWARE</code> — all installed software per device.</div></div>
+    <div class="step"><div class="step-n">VIEW</div><div class="step-t"><code>v_GS_PROCESSOR</code>, <code>v_GS_PHYSICAL_MEMORY</code>, <code>v_GS_DISK</code> — hardware inventory per device.</div></div>
+    <div class="step"><div class="step-n">VIEW</div><div class="step-t"><code>v_UpdateComplianceStatus</code> — patch compliance per device per update.</div></div>
+    <div class="step"><div class="step-n">VIEW</div><div class="step-t"><code>v_DeploymentSummary</code> — deployment results summary by deployment ID.</div></div>
+    <div class="step"><div class="step-n">VIEW</div><div class="step-t"><code>v_ClientDeploymentState</code> — client health and deployment state per device.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Maintenance tasks</div><div class="steps">
+    <div class="step"><div class="step-n">STEP 1</div><div class="step-t">Enable built-in maintenance tasks: Administration → Site Configuration → Sites → right-click → Site Maintenance</div></div>
+    <div class="step"><div class="step-n">STEP 2</div><div class="step-t">Enable Backup Site Server and all Delete Aged Data tasks</div></div>
+    <div class="step"><div class="step-n">STEP 3</div><div class="step-t">Configure SQL maintenance: weekly index rebuild, nightly reorganize, daily stats update (Ola Hallengren scripts recommended)</div></div>
+    <div class="step"><div class="step-n">STEP 4</div><div class="step-t">Monitor DB size in SSMS. Set transaction log to Simple recovery if full backups are in place.</div></div>
+    <div class="step"><div class="step-n">STEP 5</div><div class="step-t">Review SQL Error Log weekly — look for severity 17+ errors, deadlocks, blocking.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Key checks</div><div class="checks">
+    <div class="check"><span class="check-icon">✓</span><span>SQL collation confirmed before MECM install — verify in SSMS: Server Properties → General</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>SQL max memory set — Server Properties → Memory</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Backup Site Server maintenance task enabled and running successfully</span></div>
+    <div class="check"><span class="check-icon">✓</span><span>Delete Aged Data tasks all enabled to prevent DB bloat</span></div>
+  </div></div>
+  <div class="section"><div class="section-label">Troubleshooting</div><div class="ts">
+    <div class="ts-row"><div class="ts-lbl">CONSOLE_SLOW</div><div class="ts-txt">Index fragmentation. Run index maintenance. Check SQL blocking via <code>sys.dm_exec_requests</code>.</div></div>
+    <div class="ts-row"><div class="ts-lbl">DB_GROWING</div><div class="ts-txt">Aged data tasks not running. Enable all Delete Aged Data tasks. Check transaction log growth.</div></div>
+    <div class="ts-row"><div class="ts-lbl">BACKUP_FAILS</div><div class="ts-txt">Monitoring → Site Status → Backup Site Server component. Check SQL Agent job history.</div></div>
+    <div class="ts-row"><div class="ts-lbl">SQL_MEMORY</div><div class="ts-txt">OS starved — SQL took all RAM. SSMS → Server Properties → Memory → set Max Server Memory.</div></div>
+  </div></div>
+  <div class="section"><div class="section-label">Q&A</div><div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q1 — SQL collation required and where set?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>SQL_Latin1_General_CP1_CI_AS</code>. Set during SQL Server installation at instance level. Cannot be changed without rebuilding SQL.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q2 — Default CM database name?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>CM_[SiteCode]</code> e.g., CM_P01. Created automatically during MECM setup. Never rename after creation.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q3 — Why must SQL max memory be capped?<span class="qa-chevron">▾</span></div><div class="qa-a">SQL defaults to unlimited and consumes all RAM, starving the OS. Set max server memory = total RAM minus 4-8GB. Via SSMS: Server Properties → Memory.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q4 — Primary join key for device data across views?<span class="qa-chevron">▾</span></div><div class="qa-a"><code>v_R_System.ResourceID</code> — used in almost all queries: <code>JOIN v_R_System sys ON other_view.ResourceID = sys.ResourceID</code></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q5 — Where in console do you enable built-in maintenance tasks?<span class="qa-chevron">▾</span></div><div class="qa-a">Administration → Site Configuration → Sites → right-click site → Site Maintenance.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q6 — What causes console to become slow over time?<span class="qa-chevron">▾</span></div><div class="qa-a">Index fragmentation from heavy write activity. Run weekly index rebuilds. Also: aged data not purged and SQL memory not limited.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q7 — What does v_GS_INSTALLED_SOFTWARE contain?<span class="qa-chevron">▾</span></div><div class="qa-a">Software inventory — all programs detected via Add/Remove Programs and WMI. Columns: ProductName, ProductVersion, Publisher, InstallDate. Join to v_R_System via ResourceID.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q8 — Raw tables or v_ views for queries?<span class="qa-chevron">▾</span></div><div class="qa-a">Always v_ views — Microsoft-supported, documented, stable across MECM versions. Raw tables change schema between releases and are unsupported.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q9 — Recommended TempDB configuration?<span class="qa-chevron">▾</span></div><div class="qa-a">One TempDB data file per CPU core, max 8 files, all equal size. Reduces allocation page contention under heavy MECM write loads.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="tgl(this)">Q10 — How to back up the MECM site?<span class="qa-chevron">▾</span></div><div class="qa-a">Enable Backup Site Server maintenance task in MECM — backs up site DB, site files, and CD.Latest folder. Also use SQL native backups for the CM DB. Test restores periodically.</div></div>
+  </div></div>
+  <div class="mod-footer"><button class="fn-btn" onclick="goTo(8)">← Boundaries</button><button class="fn-btn" style="opacity:.4;cursor:default">Course Complete ✓</button></div>
+</div>
+
+</main>
+</div>
+
+<script>
+function goTo(n) {
+  document.querySelectorAll('.module').forEach((m,i) => m.classList.toggle('active', i===n));
+  document.querySelectorAll('.nav-item').forEach((b,i) => b.classList.toggle('active', i===n));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function tgl(el) {
+  const a = el.nextElementSibling;
+  el.classList.toggle('open');
+  a.classList.toggle('open');
+}
+</script>
+</body>
+</html>
